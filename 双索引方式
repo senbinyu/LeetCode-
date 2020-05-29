@@ -1,0 +1,90 @@
+双索引方式
+
+双指针
+
+对撞指针，
+例题有two-sum， LeetCode125，344,345,11。
+其中two-sum有多种解法，此处提供的是对撞指针法，即利用while (l<r)，直到左右指针对撞为止。
+有趣的是11题，https://leetcode.com/problems/container-with-most-water/submissions/
+思路是前后指针，然后舍弃两者之间的短板，每次都保留最大值。代码如下：
+class Solution:
+    def maxArea(self, height: List[int]) -> int:
+        l,r=0,len(height)-1
+        area=0
+        while l<r:
+            area=max(area, min(height[l],height[r])*(r-l))
+            if height[l]<height[r]:
+                l+=1
+            else:
+                r-=1
+        return area
+
+快慢指针，
+指针以不同速度的指针如果在环形存在的情况下会最终重复在一起，理论推导如下：设fast为2倍的slow，闭环的长度为n，则fast=2*slow; fast=slow+n，所以slow=n。
+例题142，链接：https://leetcode.com/problems/linked-list-cycle-ii/submissions/
+具体思路是快慢指针先走，确定重合后，再分配一个指针从头开始走，和现在的指针在入口相遇。代码如下：
+class Solution:
+    def detectCycle(self, head: ListNode) -> ListNode:
+        fast, slow = head, head
+        while fast != None:
+            fast=fast.next
+            if fast==None:
+                break
+            fast=fast.next
+            slow=slow.next
+            if slow==fast:
+                break
+        if fast==None:
+            return None
+        
+        p1,p2=head,slow
+        while p1!=p2:
+            p1=p1.next
+            p2=p2.next
+        
+        return p1
+
+滑动窗口，
+也是利用双索引的方法，只不过是左右指针都是向一侧移动，控制窗口的大小。有一道例题，https://leetcode.com/problems/minimum-size-subarray-sum/
+代码如下：
+class Solution:
+    def minSubArrayLen(self, s: int, nums: List[int]) -> int:
+        n=len(nums)
+        sn=[]
+        for num in nums:
+            if not sn:
+                sn.append(num)
+            else:
+                sn.append(sn[-1]+num)
+                
+        for i in range(n):
+            sn[i]=sn[i-1]+nums[i]
+        
+        l,r=0,0
+        ans=n+1
+        while l<=r and r<n:
+            if sn[r]-sn[l]+nums[l]>=s:
+                ans=min(ans,r-l+1)
+                l+=1
+            else:
+                r+=1
+        if ans==n+1:
+            return 0
+        else:
+            return ans
+
+
+滑动窗口LeetCode 3 ，https://leetcode.com/problems/longest-substring-without-repeating-characters/submissions/
+代码如下：
+class Solution:
+    def lengthOfLongestSubstring(self, s: str) -> int:
+        l,r,ans=0,0,0
+        lib={}
+        for r, c in enumerate(s):
+            if c in lib:
+                l=max(l,lib[c]+1)  #previous substring index or the current replicated index
+            lib[c]=r
+            ans=max(ans,r-l+1)
+        return ans
+
+
